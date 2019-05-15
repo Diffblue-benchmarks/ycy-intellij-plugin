@@ -1,0 +1,354 @@
+buildCmd: ./gradlew assemble
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 27.0
+#  >methods=7
+#  >complexity=54
+#  >construction=3.0
+#  >dependency=1.5
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingTable.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingTable.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingTable$ModelAdapter.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingTable.java
+# Target TGF: 76.5
+#  >methods=5
+#  >complexity=34
+#  >construction=9.0
+#  >dependency=0.25
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/remind/RemindTask.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/remind/RemindTask.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/remind/RemindTask$Reminder.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/remind/RemindTask.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigService.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigService.java
+# Target TGF: 86.1904761905
+#  >methods=16
+#  >complexity=227
+#  >construction=7.0
+#  >dependency=3.64285714286
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingTable$ModelAdapter.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingTable.java
+# Target TGF: 8.625
+#  >methods=7
+#  >complexity=43
+#  >construction=0.75
+#  >dependency=2.5
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigServiceImpl.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigServiceImpl.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigService.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigService.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.java
+# Target TGF: 45.0
+#  >methods=18
+#  >complexity=80
+#  >construction=7.0
+#  >dependency=4.0
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingForm.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingForm.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingTable.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingTable.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingForm$1.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingForm.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState$RemindTypeEnum.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigService.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigService.java
+# Target TGF: 119.5
+#  >methods=16
+#  >complexity=160
+#  >construction=3.0
+#  >dependency=2.5
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.java
+# Target TGF: 74.25
+#  >methods=11
+#  >complexity=135
+#  >construction=4.25
+#  >dependency=4.0
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingPage.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingPage.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigService.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigService.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/remind/RemindTask.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/remind/RemindTask.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingForm.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/PluginSettingForm.java
+# Target TGF: 12.0
+#  >methods=2
+#  >complexity=36
+#  >construction=1.0
+#  >dependency=0.333333333333
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/remind/RemindTask$Reminder.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/remind/RemindTask.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/remind/RemindStrategy.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/remind/RemindStrategy.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigService.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigService.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState$RemindTypeEnum.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.java
+# Target TGF: 15.75
+#  >methods=5
+#  >complexity=7
+#  >construction=2.25
+#  >dependency=1.0
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/remind/ImageManagerImpl.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/remind/ImageManagerImpl.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/remind/ImageManager.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/remind/ImageManager.java
+# Target TGF: 7.2
+#  >methods=3
+#  >complexity=36
+#  >construction=1.0
+#  >dependency=0.2
+ - target:
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/remind/RemindStrategy$RemindIndirect.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/remind/RemindStrategy.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/remind/RemindStrategy.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/remind/RemindStrategy.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigService.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigService.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/remind/OpenImageAction.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/remind/OpenImageAction.java
+   - dir: build/classes/java/main-instrumented
+     file: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.class
+     sourceDir: src/main/java
+     sourceFile: cn/fantasticmao/ycy/intellij/plugin/config/ConfigState.java
